@@ -1,0 +1,227 @@
+---
+import '../../styles/global.css';
+import { getAlbumPaths, getAlbum,getPosts } from '../../utils/api';
+import LikeCounter from '../../components/LikeCounter'; // Importa el componente React
+import SearchComponent from '../../components/SearchComponent';
+
+// Define las rutas dinámicas
+export async function getStaticPaths() {
+  const albums = await getAlbumPaths();
+  return albums.map(album => ({
+    params: { slug: album.id },
+  }));
+}
+
+// Obtén los datos del álbum actual
+const { slug } = Astro.params;
+const album = await getAlbum(slug);
+const albumes = await getPosts();
+
+if (!album) {
+  throw new Error('Álbum no encontrado');
+}
+---
+
+
+<html lang="es">
+  <meta charset="UTF-8">
+
+  <body class="bg-gradient-to-b from-gray-50 via-white to-gray-100 text-gray-900">
+    <!-- Barra de Navegación -->
+    <nav class="absolute bg-black top-0 left-0 w-full text-white py-4 z-50">
+      <div class="container mx-auto flex justify-between items-center px-6">
+        <a href="/" class="flex items-center text-4xl font-extrabold tracking-wide hover:text-gray-200">
+          Music Diggers<img src="/logo1.png" alt="Music Diggers Logo" class="w-16 h-11 ml-2">
+        </a>
+        <ul class="flex space-x-8">
+          <SearchComponent client:load />
+          <li><a href="/" class="hover:text-gray-300 text-lg transition-all duration-300">Inicio</a></li>
+          <li><a href="/noticias" class="hover:text-gray-300 text-lg transition-all duration-300">Ultimas Noticias</a></li>
+          <li><a href="/rap/usa" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop USA</a></li>
+          <li><a href="/rap/uk" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop UK</a></li>
+          <li><a href="/r&b" class="hover:text-gray-300 text-lg transition-all duration-300">R&B</a></li>
+          <li><a href="/reggaeton" class="hover:text-gray-300 text-lg transition-all duration-300">Reggaeton</a></li>
+          <li><a href="/afrobeat" class="hover:text-gray-300 text-lg transition-all duration-300">Afrobeats</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Cabecera del Álbum -->
+    <header class="relative text-white py-48" style={`background-image: url(${album.coverImage}); background-size: cover; background-position: center;`}>
+      <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+      <div class="relative container mx-auto text-center px-8">
+
+        <p class="text-8xl font-extrabold italic mb-4">{album.artist}</p>
+        <h1 class="text-5xl font-bold mb-6 drop-shadow-lg">{album.title}</h1>
+      </div>
+    </header>
+
+    <!-- Detalles del Álbum -->
+    <main class="container mx-auto px-6 py-16">
+      <article class="prose prose-lg max-w-3xl mx-auto text-gray-800">
+        <!-- Album Cover -->
+        <div class="mb-10 text-center">
+          <img 
+            src={album.coverImage} 
+            alt={album.title} 
+            class="w-full max-w-3xl mx-auto h-auto rounded-xl shadow-xl transition-transform duration-300 hover:scale-105" 
+          />
+        </div>
+    
+        <!-- Album Title and Artist -->
+        <div class="text-center mb-4">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">
+            {album.title}
+          </h1>
+          <h2 class="text-2xl md:text-3xl font-medium text-gray-700 mb-4">
+            {album.artist}
+          </h2>
+          <div class="text-center mt-2">
+            <LikeCounter albumId={album.id} client:load />
+          </div>
+        </div>
+    
+        <!-- Album Details -->
+        <div class="bg-gray-100 p-6 rounded-lg shadow-md text-gray-700">
+          <p class="text-lg mb-4">
+            <span class="font-semibold text-gray-900">Lanzamiento:</span> {album.releaseYear}
+          </p>
+    
+          {album.genre && (
+            <p class="text-lg mb-4">
+              <span class="font-semibold text-gray-900">Género:</span> {album.genre}
+            </p>
+          )}
+
+{album.genre && (
+  <p class="text-lg mb-4">
+    <span class="font-semibold text-gray-900">País:</span> {album.country}
+  </p>
+)}
+    
+          {album.price && (
+            <p class="text-lg mb-4">
+              <span class="font-semibold text-gray-900">Precio:</span>
+              <span class="font-bold text-red-600"> {album.price} €</span>
+            </p>
+          )}
+    
+          {album.summary && (
+            <div class="mt-6 text-gray-600">
+              <h3 class="text-xl font-semibold mb-2">Resumen:</h3>
+              <p class="leading-relaxed">{album.summary}</p>
+            </div>
+          )}
+    
+          {album.tracklist && (
+            <div class="mt-8">
+              <h3 class="text-xl font-semibold mb-2">Lista de canciones:</h3>
+              <ul class="list-disc list-inside space-y-2 text-gray-600">
+                {album.tracklist.map((track, index) => (
+                  <li key={index} class="leading-relaxed">{track}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </article>
+
+
+      <section class="mt-12">
+        <hr class="border-t-2 border-gray-200 my-8">
+        <h2 class="text-3xl font-bold text-center mb-6">Categorías Relacionadas</h2>
+      
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <!-- Primera Columna: Género 1 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">R&B</h3>
+            {albumes
+              .filter(album => album.genre === 'R&B')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+      
+          <!-- Segunda Columna: Género 2 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">Afrobeats</h3>
+            {albumes
+              .filter(album => album.genre === 'Afrobeats')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+      
+          <!-- Tercera Columna: Género 3 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">Hip Hop UK</h3>
+            {albumes
+              .filter(album => album.genre === 'Rap (UK)')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+        <hr class="border-t-2 border-gray-200 my-8">
+      
+      </section>
+    </main>
+    
+    
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-10 mt-20">
+      <div class="container mx-auto text-center">
+        <p class="text-lg font-semibold text-gray-200">Gracias por visitar Music Diggers</p>
+        <p class="text-sm mt-4">&copy; 2025 Music Diggers. Todos los derechos reservados.</p>
+        <div class="mt-6 space-x-8">
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Facebook</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Twitter</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Instagram</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

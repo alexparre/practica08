@@ -1,0 +1,147 @@
+---
+import '../../styles/global.css';
+import { getNews } from '../../utils/api';
+import SearchComponent from '../../components/SearchComponent';
+
+// Define las rutas dinámicas para cada noticia
+export async function getStaticPaths() {
+  const news = await getNews(); // Obtén todas las noticias desde la API
+
+  return news.map((noticia) => ({
+    params: { id: noticia.id }, // Define el parámetro dinámico 'id'
+  }));
+}
+
+// Obtén el ID de la URL
+const { id } = Astro.params;
+const news = await getNews();
+
+// Busca la noticia específica por ID
+const noticia = news.find((item) => item.id === id);
+
+if (!noticia) {
+  throw new Error('Noticia no encontrada');
+}
+---
+
+
+<html lang="es">
+    <meta charset="UTF-8">
+
+  <body class="bg-gradient-to-b from-gray-50 via-white to-gray-100 text-gray-900">
+  <!-- Barra de Navegación -->
+  <nav class="absolute top-0 left-0 w-full bg-black text-white py-4 z-50">
+    <div class="container mx-auto flex justify-between items-center px-6">
+      <a href="/" class="flex items-center text-4xl font-extrabold tracking-wide hover:text-gray-200">
+                  Music Diggers<img src="../logo1.png" alt="Music Diggers Logo" class="w-16 h-11 mr-2">
+      </a>
+      <ul class="flex space-x-8">
+        <SearchComponent client:load />
+        <li><a href="/" class="hover:text-gray-300 text-lg transition-all duration-300">Inicio</a></li>
+        <li><a href="/noticias" class="hover:text-gray-300 text-lg transition-all duration-300">Ultimas Noticias</a></li>
+        <li><a href="/rap/usa" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop USA</a></li>
+        <li><a href="/rap/uk" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop UK</a></li>
+        <li><a href="/r&b" class="hover:text-gray-300 text-lg transition-all duration-300">R&B</a></li>
+        <li><a href="/reggaeton" class="hover:text-gray-300 text-lg transition-all duration-300">Reggaeton</a></li>
+        <li><a href="/afrobeat" class="hover:text-gray-300 text-lg transition-all duration-300">Afrobeats</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto px-6 py-16">
+        <article class="prose prose-lg max-w-3xl mx-auto text-gray-800">
+          <!-- Imagen de la Noticia con el Título Superpuesto -->
+          <div class="relative mb-8">
+            <img src={noticia.image} alt={noticia.title}class="w-full max-w-4xl mx-auto mt-8 h-auto rounded-lg shadow-lg"
+          />            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+              <h1 class="text-white text-3xl font-extrabold text-center px-4">{noticia.title}</h1>
+            </div>
+          </div>
+          
+          <div class="mb-6 text-center text-gray-600">
+            <p class="text-lg">
+              Publicado el <span class="font-semibold">{new Date(noticia.date).toLocaleDateString()}</span>
+            </p>
+            {noticia.author && (
+              <p class="text-lg">
+                Por <span class="font-bold">{noticia.author}</span>
+              </p>
+            )}
+            {noticia.category && (
+              <p class="text-lg">
+                Categoría: <span class="font-bold">{noticia.category}</span>
+              </p>
+            )}
+          </div>
+      
+          <!-- Contenido de la Noticia -->
+          <p>{noticia.content}</p>
+        </article>
+        <div class="mt-8 text-center">
+          <a href="/noticias" class="inline-block  bg-gradient-to-r from-yellow-400 via-red-500 to-pink-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-800 transition-all">
+            Volver
+          </a>
+        </div>
+      </main>
+
+      <!-- Categorías Relacionadas -->
+      <section class="mt-16">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Noticias Relacionadas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center">
+          {news
+            .sort((a, b) => new Date(a.date) - new Date(b.date)) // Ordenar por fecha ascendente
+            .slice(0, 3) // Selecciona solo 3 noticias
+            .map(noticia => (
+              <div
+                class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-transform transform hover:scale-105 w-96"
+                key={noticia.id}
+              >
+                <!-- Imagen de la noticia -->
+                <div class="w-full h-48 bg-gray-200">
+                  <a href={`/noticias/${noticia.id}`}>
+                    <img
+                      src={noticia.image}
+                      alt={noticia.title}
+                      class="w-full h-full object-cover"
+                    />
+                  </a>
+                </div>
+                <!-- Título de la noticia -->
+                <div class="p-4">
+                  <h3 class="text-lg font-bold text-gray-800 truncate">
+                    <a
+                      href={`/noticias/${noticia.id}`}
+                      class="hover:text-indigo-500 transition-all"
+                    >
+                      {noticia.title}
+                    </a>
+                  </h3>
+                  <!-- Resumen opcional -->
+                  <p class="text-sm text-gray-600 mt-2 truncate">
+                    {noticia.content.substring(0, 80)}...
+                  </p>
+                </div>
+              </div>
+            ))}
+        </div>
+      </section>
+      
+      
+      
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-10 mt-20">
+      <div class="container mx-auto text-center">
+        <p class="text-lg font-semibold text-gray-200">Gracias por visitar Music Diggers</p>
+        <p class="text-sm mt-4">&copy; 2025 Music Diggers. Todos los derechos reservados.</p>
+        <div class="mt-6 space-x-8">
+            <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Facebook</a>
+            <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Twitter</a>
+            <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Instagram</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

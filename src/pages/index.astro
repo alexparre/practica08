@@ -1,0 +1,237 @@
+---
+import '../styles/global.css';
+import { getPosts, getNews, getEvents } from '../utils/api'; // Asegúrate de tener esta función
+import SearchComponent from '../components/SearchComponent';
+
+// Obtén los datos desde Firebase
+const albums = await getPosts();
+const news = await getNews();
+const events = await getEvents(); // Obtén los eventos
+
+---
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+<html lang="es">
+  <meta charset="UTF-8">
+  <body class="bg-gradient-to-b from-gray-50 via-white to-gray-100 text-gray-900">
+    <!-- Barra de Navegación -->
+    <nav class="absolute top-0 left-0 w-full text-white py-4 z-50">
+      <div class="container mx-auto flex justify-between items-center px-6">
+        <a href="/" class="flex items-center text-4xl font-extrabold tracking-wide hover:text-gray-200">
+                    Music Diggers<img src="logo1.png" alt="Music Diggers Logo" class="w-16 h-11 mr-2">
+        </a>
+        <ul class="flex space-x-8">
+          <SearchComponent client:load />
+          <li><a href="/" class="hover:text-gray-300 text-lg transition-all duration-300">Inicio</a></li>
+          <li><a href="/noticias" class="hover:text-gray-300 text-lg transition-all duration-300">Ultimas Noticias</a></li>
+          <li><a href="/rap/usa" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop USA</a></li>
+          <li><a href="/rap/uk" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop UK</a></li>
+          <li><a href="/r&b" class="hover:text-gray-300 text-lg transition-all duration-300">R&B</a></li>
+          <li><a href="/reggaeton" class="hover:text-gray-300 text-lg transition-all duration-300">Reggaeton</a></li>
+          <li><a href="/afrobeat" class="hover:text-gray-300 text-lg transition-all duration-300">Afrobeats</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative text-white py-24" style="background: url('/wall.jpeg') no-repeat center center; background-size: cover;">
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="relative container mx-auto text-center px-8">
+        <h1 class="text-5xl font-extrabold mb-6 drop-shadow-lg">Descubre lo ultimo de la musica🌐🚨</h1>
+        <p class="text-2xl mb-8">Encuentra tus álbumes favoritos y explora muchas categorias de musica.</p>
+        <a href="#colecciones" class="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-600 text-white font-bold py-4 px-12 rounded-full hover:scale-105 transition-all shadow-2xl">
+          Explorar Colecciones
+        </a>      
+      </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main id="colecciones" class="container mx-auto px-6 py-16">
+      <h2 class="text-5xl font-extrabold text-center mb-12 text-gray-800">Ultimas Novedades Mundiales!</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
+        {albums.length > 0 ? (
+
+          albums
+          .slice(0,9)
+          .map((album, index) => (
+            <div class="relative bg-white shadow-2xl rounded-lg overflow-hidden hover:shadow-3xl transition-transform transform hover:scale-105" key={album.id}>
+
+              {index < 3 && (
+                <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold uppercase py-3 px-6 rounded-full shadow-lg">
+                  New
+                </div>
+              )}
+              <div class="w-full aspect-square bg-gray-100">
+                <a href={`/blog/${album.id}`}>
+                  <img src={album.coverImage} alt={album.title} class="w-full h-full object-cover hover:opacity-90 transition-all" />
+                </a>
+              </div>
+              <div class="p-6">
+                <h3 class="text-3xl text-center font-bold text-gray-900 truncate">
+                  <a href={`/blog/${album.id}`} class="hover:text-indigo-600 transition-all">{album.title}</a>
+                </h3>
+                <p class="text-gray-600 font-semibold text-center mt-1">{album.artist}</p>
+                <p class="text-gray-600 text-center mt-1">{album.releaseYear}</p>
+                <h3 class="text-orange-600 font-semibold text-center mt-1">{album.genre}</h3>
+
+                <a href={`/blog/${album.id}`} class="mt-4 inline-block text-center bg-gradient-to-r from-yellow-400 via-red-500 to-pink-600 text-white font-bold py-2 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-800 transition-all">
+                  Ver más
+                </a>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p class="text-center text-gray-700">No se encontraron álbumes.</p>
+        )}
+      </div>
+    </main>
+
+    <!-- slide de noticias -->
+    <section class="relative text-white">
+      <div class="slider-container relative overflow-hidden h-screen w-full">
+        <div class="slider-wrapper flex transition-transform duration-500">
+          {news.map(item => (
+            <div
+              class="slider-slide flex-shrink-0 w-full h-screen flex items-center justify-center"
+              key={item.id}
+              style={`background-image: url(${item.image}); background-size: cover; background-position: center;`}
+            >
+              <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+              <div class="relative z-10 text-center px-8">
+                <h3 class="text-5xl font-bold mb-4">{item.title}</h3>
+                <p class="text-lg mb-6">{item.content.substring(0, 150)}...</p>
+                <a
+                  href={`/noticias/${item.id}`}
+                  class="bg-white text-orange-600 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition-all"
+                >
+                  Leer más
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Botones de navegación -->
+        <button class="slider-button-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-4 py-2 rounded-full">
+          Prev
+        </button>
+        <button class="slider-button-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-4 py-2 rounded-full">
+          Next
+        </button>
+      </div>
+    </section>
+    <!-- Testimonios -->
+    <section class="bg-gradient-to-b from-gray-100 via-white to-gray-100 py-20">
+      <div class="container mx-auto px-6 text-center">
+        <h2 class="text-4xl font-extrabold text-gray-800 mb-10">Lo que dicen nuestros Subscriptores</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+          <div class="bg-white shadow-xl rounded-lg p-8">
+            <p class="text-gray-600 italic">"Increíble selección de álbumes⭐. Siempre encuentro lo que busco."</p>
+            <h4 class="text-gray-900 font-bold mt-6">- Juan Pérez</h4>
+          </div>
+          <div class="bg-white shadow-xl rounded-lg p-8">
+            <p class="text-gray-600 italic">"La mejor pagina web para estar al dia de la musica.🚀 Mil gracias!!"</p>
+            <h4 class="text-gray-900 font-bold mt-6">- María López</h4>
+          </div>
+          <div class="bg-white shadow-xl rounded-lg p-8">
+            <p class="text-gray-600 italic">"Increible trabajo e increible comunidad de musica enfocado en los oyentes mas melomanos!! 👍👍👍👍 Thxxx"</p>
+            <h4 class="text-gray-900 font-bold mt-6">- Carlos Gómez</h4>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-orange-400 py-10">
+      <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">Próximos Eventos🎵🔥</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {events.map(event => (
+            <div key={event.id} class="bg-white shadow-md rounded-lg p-6">
+              <h3 class="text-2xl font-bold mb-4">{event.title}</h3>
+              <p class="text-gray-600 mb-2">
+                <strong>Fecha:</strong> {new Date(event.date).toLocaleDateString()}
+              </p>
+              <p class="text-gray-600 mb-2">
+                <strong>Ubicación:</strong> {event.location}
+              </p>
+              <p class="text-gray-600 mb-2">
+                <strong>Géneros:</strong> {event.genres.join(', ')}
+              </p>
+              <p class="text-gray-600 mb-2">
+                <strong>Artistas:</strong> {event.artists.slice(0, 3).join(', ')} {event.artists.length > 3 ? 'y más...' : ''}
+              </p>
+              <p class="text-gray-800 font-bold">
+                <strong>Precio General:</strong> €{event.price.general.toFixed(2)} | <strong>VIP:</strong> €{event.price.vip.toFixed(2)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+    
+   
+    
+    
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-10 mt-20">
+      <div class="container mx-auto text-center">
+        <p class="text-lg font-semibold text-gray-200">Gracias por visitar Music Diggers</p>
+        <p class="text-sm mt-4">&copy; 2025 Music Diggers. Todos los derechos reservados.</p>
+        <div class="mt-6 space-x-8">
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Facebook</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Twitter</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Instagram</a>
+        </div>
+      </div>
+    </footer>
+    
+        <script client:load>
+document.addEventListener('DOMContentLoaded', () => {
+    const sliderWrapper = document.querySelector('.slider-wrapper');
+    const slides = document.querySelectorAll('.slider-slide');
+    const prevButton = document.querySelector('.slider-button-prev');
+    const nextButton = document.querySelector('.slider-button-next');
+
+    let currentSlide = 0;
+
+    // Función para actualizar la posición del slider
+    const updateSliderPosition = () => {
+      const slideWidth = slides[0].clientWidth;
+      sliderWrapper.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+
+      slides.forEach((slide, index) => {
+        slide.style.opacity = index === currentSlide ? '1' : '0';
+      });
+    };
+
+    // Botón "Next"
+    nextButton.addEventListener('click', () => {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+      } else {
+        currentSlide = 0; // Reinicia al primer slide
+      }
+      updateSliderPosition();
+    });
+
+    // Botón "Prev"
+    prevButton.addEventListener('click', () => {
+      if (currentSlide > 0) {
+        currentSlide--;
+      } else {
+        currentSlide = slides.length - 1; // Va al último slide
+      }
+      updateSliderPosition();
+    });
+
+    // Inicializa el slider
+    updateSliderPosition();
+  });
+    </script>
+  </body>
+</html>

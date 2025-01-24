@@ -1,0 +1,169 @@
+---
+import '../../styles/global.css';
+import { getPosts } from '../../utils/api'; // Importa la función para obtener los álbumes
+import SearchComponent from '../../components/SearchComponent';
+
+// Filtra los álbumes de Reggaetón
+const albums = await getPosts();
+const afrobeatsAlbums = albums.filter(album => album.genre === 'Rap (UK)');
+---
+
+<html lang="es">
+  <meta charset="UTF-8">
+
+  <body class="bg-gradient-to-b from-gray-50 via-white to-gray-100 text-gray-900">
+    <!-- Barra de Navegación -->
+    <nav class="absolute top-0 left-0 w-full text-white py-4 z-50">
+      <div class="container mx-auto flex justify-between items-center px-6">
+        <a href="/" class="flex items-center text-4xl font-extrabold tracking-wide hover:text-gray-200">
+          Music Diggers<img src="../../logo1.png" alt="Music Diggers Logo" class="w-16 h-11 mr-2">
+</a>
+        <ul class="flex space-x-8">
+          <SearchComponent client:load />
+          <li><a href="/" class="hover:text-gray-300 text-lg transition-all duration-300">Inicio</a></li>
+          <li><a href="/noticias" class="hover:text-gray-300 text-lg transition-all duration-300">Ultimas Noticias</a></li>
+          <li><a href="/rap/usa" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop USA</a></li>
+          <li><a href="/rap/uk" class="hover:text-gray-300 text-lg transition-all duration-300">Hip Hop UK</a></li>
+          <li><a href="/r&b" class="hover:text-gray-300 text-lg transition-all duration-300">R&B</a></li>
+          <li><a href="/reggaeton" class="hover:text-gray-300 text-lg transition-all duration-300">Reggaeton</a></li>
+          <li><a href="/afrobeat" class="hover:text-gray-300 text-lg transition-all duration-300">Afrobeats</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative text-white py-24" style="background: url('/wall.jpeg') no-repeat center center; background-size: cover;">
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="relative container mx-auto text-center px-8">
+        <h1 class="text-5xl font-extrabold mb-6 drop-shadow-lg">Tendencia en Hip Hop UK🎙️</h1>
+        <p class="text-2xl mb-8">Explora los mejores ritmos del Rap , trap, drill y mas subgeneros de UK</p>
+      </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto px-6 py-16">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
+        {afrobeatsAlbums.length > 0 ? (
+          afrobeatsAlbums.map(album => (
+            <div class="bg-white shadow-2xl rounded-lg overflow-hidden hover:shadow-3xl transition-transform transform hover:scale-105" key={album.id}>
+              <div class="w-full aspect-square bg-gray-100">
+                <a href={`/blog/${album.id}`}>
+                  <img src={album.coverImage} alt={album.title} class="w-full h-full object-cover hover:opacity-90 transition-all" />
+                </a>
+              </div>
+              <div class="p-6">
+                <h3 class="text-3xl text-center font-bold text-gray-900 truncate">
+                  <a href={`/blog/${album.id}`} class="hover:text-indigo-600 transition-all">{album.title}</a>
+                </h3>
+                <p class="text-gray-600 font-semibold text-center mt-1">{album.artist}</p>
+                <p class="text-gray-600 text-center mt-1">{album.releaseYear}</p>
+                <h3 class="text-orange-600 font-semibold text-center mt-1">{album.genre}</h3>
+
+                <a href={`/blog/${album.id}`} class="mt-4 inline-block text-center bg-gradient-to-r from-yellow-400 via-red-500 to-pink-600 text-white font-bold py-2 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-800 transition-all">
+                  Ver más
+                </a>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p class="text-center text-gray-700">No se encontraron álbumes de Rap UK.</p>
+        )}
+      </div>
+
+      <section class="mt-12">
+        <hr class="border-t-2 border-gray-200 my-8">
+        <h2 class="text-3xl font-bold text-center mb-6">Categorías Relacionadas</h2>
+      
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <!-- Primera Columna: Género 1 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">R&B</h3>
+            {albums
+              .filter(album => album.genre === 'R&B')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+      
+          <!-- Segunda Columna: Género 2 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">Afrobeats</h3>
+            {albums
+              .filter(album => album.genre === 'Afrobeats')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+      
+          <!-- Tercera Columna: Género 3 -->
+          <div class="flex flex-col items-center">
+            <h3 class="text-md font-semibold text-gray-600 mb-4">Reggaeton</h3>
+            {albums
+              .filter(album => album.genre === 'Reggaeton')
+              .slice(0, 2)
+              .map(album => (
+                <div class="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition-transform transform hover:scale-105 mb-4 w-60" key={album.id}>
+                  <div class="w-full">
+                    <a href={`/blog/${album.id}`}>
+                      <img src={album.coverImage} alt={album.title} class="w-full h-auto object-contain" />
+                    </a>
+                  </div>
+                  <div class="p-2 text-center">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">
+                      <a href={`/blog/${album.id}`} class="hover:text-indigo-500 transition-all">{album.title}</a>
+                    </h4>
+                    <p class="text-xs text-gray-500">{album.artist}</p>
+      
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+        <hr class="border-t-2 border-gray-200 my-8">
+      
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-10 mt-20">
+      <div class="container mx-auto text-center">
+        <p class="text-lg font-semibold text-gray-200">Gracias por visitar Music Diggers</p>
+        <p class="text-sm mt-4">&copy; 2025 Music Diggers. Todos los derechos reservados.</p>
+        <div class="mt-6 space-x-8">
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Facebook</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Twitter</a>
+          <a href="#" class="text-orange-400 hover:orange-blue-500 transition-all">Instagram</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
