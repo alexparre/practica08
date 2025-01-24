@@ -26,13 +26,7 @@ export async function getAlbumPaths() {
 }
 
 // Obtén los datos de un álbum específico
-export async function getAlbum(id) {
-  const snapshot = await get(ref(db, `albums/${id}`));
-  if (!snapshot.exists()) {
-    throw new Error('Álbum no encontrado');
-  }
-  return snapshot.val();
-}
+
 export async function getNews() {
   const snapshot = await get(ref(db, 'news'));
   if (!snapshot.exists()) {
